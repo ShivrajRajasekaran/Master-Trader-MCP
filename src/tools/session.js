@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getCurrentSession, KILL_ZONES, SESSION_PIVOTS } from "../engine/kill-zones.js";
+import { getQuarterlyPhase, getMacroWindow, isSilverBulletWindow, getOptimalEntryTiming } from "../engine/time.js";
 
 export function registerSessionTools(server) {
   server.tool(
@@ -20,6 +21,9 @@ export function registerSessionTools(server) {
       const estHour = ((d.getUTCHours() - 5 + 24) % 24);
       const istHour = d.getUTCHours() + 5.5;
 
+      const timing = getOptimalEntryTiming(now);
+      const macro = getMacroWindow(now);
+
       const result = {
         ...session,
         time: {
@@ -30,6 +34,13 @@ export function registerSessionTools(server) {
             : undefined,
         },
         killZones: KILL_ZONES,
+        timing: {
+          quarterly: timing.quarterly.quarter,
+          macro: macro.inMacro ? macro.activeMacro.note : macro.nextMacro ? `Next: ${macro.nextMacro.start} EST` : "None",
+          silverBullet: timing.silverBullet.inWindow,
+          score: `${timing.score}/3`,
+          recommendation: timing.recommendation,
+        },
         verdict: session.canTrade
           ? `GO — Inside ${session.activeKillZone.label}. Trading ALLOWED.`
           : `NO TRADE — ${session.reason}. Wait for next Kill Zone.`,

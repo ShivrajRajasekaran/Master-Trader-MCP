@@ -1,0 +1,18 @@
+/**
+ * Master Trader MCP — Library Exports
+ * Use these directly if integrating the engines into your own code.
+ */
+
+// Core Engines
+export { KalmanFilter, computeATR, computeWMA, computeSupertrend, analyzeTrend } from "./engine/kalman-filter.js";
+export { getCurrentSession, getSessionRange, KILL_ZONES, AVOID_ZONES, SESSION_PIVOTS } from "./engine/kill-zones.js";
+export { detectSwings, classifyStructure, detectBOS, detectCHoCH, detectCISD, detectCRT, getHTFBias } from "./engine/structure.js";
+export { detectLiquiditySweep, detectRecentSweep, detectOrderBlocks, detectFVGs, computeOTE, priceInZone, priceInOTE } from "./engine/liquidity.js";
+export { detectAMDPhase, getAMDModel } from "./engine/amd.js";
+export { analyzeVolume, validateDisplacementWithVolume, detectExhaustion, computePOC } from "./engine/volume.js";
+export { detectDisplacement, detectWyckoffSpring, detectWyckoffUTAD, detectBreakerBlock, detectInducement, validateOrderBlock } from "./engine/patterns.js";
+export { computePDH_PDL, computePWH_PWL, getAsiaRange, getLondonRange, getNYRange, detectEqualHighs, detectEqualLows, getAllKeyLevels } from "./engine/levels.js";
+export { getQuarterlyPhase, getMacroWindow, isSilverBulletWindow, getOptimalEntryTiming, QUARTERLY_THEORY, MACRO_WINDOWS, SILVER_BULLET, POWER_OF_3 } from "./engine/time.js";
+
+// Gate System
+export { runGates } from "./gates/entry-gates.js";

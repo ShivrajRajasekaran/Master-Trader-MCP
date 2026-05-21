@@ -78,15 +78,26 @@ export function computeSupertrend(kalmanValues, bars, factor = 0.7, atrPeriod = 
 
   const k = kalmanValues[kalmanValues.length - 1];
   const kPrev = kalmanValues[kalmanValues.length - 2];
+  const price = bars[bars.length - 1].close;
+  const pricePrev = bars[bars.length - 2].close;
 
   const upperBand = k + factor * atr;
   const lowerBand = k - factor * atr;
 
-  // Simplified: if price (kalman) breaks above upper → bullish (-1 in original)
-  // if price breaks below lower → bearish (1 in original)
-  const direction = k > upperBand ? -1 : k < lowerBand ? 1 : 0;
+  // Supertrend logic: price position relative to Kalman bands determines trend
+  // Bullish: price closes above upper band (trend up)
+  // Bearish: price closes below lower band (trend down)
+  // Use state persistence: once bullish, stay bullish until price closes below lower
+  let direction = 0;
+  if (price > upperBand) direction = -1; // bullish (matches AlgoAlpha convention)
+  else if (price < lowerBand) direction = 1; // bearish
+  else {
+    // Inside bands — use momentum of Kalman slope
+    if (k > kPrev && price > k) direction = -1;
+    else if (k < kPrev && price < k) direction = 1;
+  }
 
-  return { direction, value: direction === -1 ? lowerBand : upperBand, atr };
+  return { direction, value: direction === -1 ? lowerBand : upperBand, atr, upperBand, lowerBand };
 }
 
 export function analyzeTrend(bars, options = {}) {

@@ -7,15 +7,26 @@ Institutional-grade forex trading analysis plugin for Claude Code. Built on the 
 An MCP (Model Context Protocol) server that provides professional trading analysis tools to Claude Code. Instead of amateur EMA/RSI signals, it implements the full institutional system:
 
 - **7-Gate Entry System** — Every signal must pass 7 validation gates
-- **Kill Zone Sessions** — Only trade London (2-5AM EST) and NY AM (9:30-11AM EST)
-- **Kalman Filter** — Detect trending vs ranging (no trades during chop)
-- **AMD Model** — Accumulation → Manipulation → Distribution
-- **Liquidity Sweeps** — BSL/SSL detection and sweep confirmation
+- **Kill Zone Sessions** — London (2-5AM), NY AM (9:30-11AM), Silver Bullet (10-11AM), NY PM (1:30-3PM)
+- **Kalman Filter + Supertrend** — Detect trending vs ranging (no trades during chop)
+- **AMD State Machine** — Accumulation → Manipulation → Distribution cycle detection
+- **Liquidity Sweeps** — BSL/SSL detection with displacement validation
 - **CRT (Candle Range Theory)** — HTF candle H/L as liquidity targets
 - **CISD (Change in State of Delivery)** — Precise order flow shift detection
 - **OTE Zone** — Fibonacci 61.8-78.6% entry zone
-- **Order Blocks** — Last opposite candle before displacement
+- **Order Blocks** — Displacement-validated OBs only (no weak zones)
 - **Fair Value Gaps** — 3-candle imbalance entry zones
+- **Wyckoff Spring/UTAD** — Institutional reversal patterns
+- **Breaker Blocks** — Failed OBs that flip polarity
+- **Inducement** — Minor liquidity grabs before real sweep
+- **Volume Profile** — POC, VAH/VAL, exhaustion detection
+- **Key Levels** — PDH/PDL, PWH/PWL, session ranges, EQH/EQL
+- **Quarterly Theory** — 15-min AMD cycles within each hour
+- **Macro Time Windows** — xx:50-xx:10 high-probability expansion windows
+- **Silver Bullet** — 10-11AM EST single FVG entry protocol
+- **Draw on Liquidity** — Automated TP targeting based on nearest untapped liquidity
+- **Multi-Pair Scanner** — Score and rank pairs by setup quality (A+ to D)
+- **Trade Journal** — Log entries, close with results, track win rate and streaks
 - **Partial TP Management** — 30/40/30 split at 1.5R/2.5R/4R
 - **Risk Management** — 1% per trade, 3% daily max, max 3 trades/day
 
@@ -37,14 +48,20 @@ claude mcp add master-trader node /path/to/master-trader-mcp/src/server.js
 
 | Tool | Description |
 |------|-------------|
-| `trade_session_check` | Kill Zone gate — current session status |
+| `trade_session_check` | Kill Zone gate + macro window + quarterly phase + timing score |
 | `trade_next_killzone` | Time until next tradeable session |
-| `trade_signal` | Full 7-gate analysis → BUY/SELL/WAIT |
-| `trade_analyze` | Complete market structure report |
-| `trade_htf_bias` | Higher timeframe bias check |
+| `trade_signal` | Full 7-gate analysis → BUY/SELL/WAIT with confidence grade |
+| `trade_analyze` | Complete institutional analysis (structure, OBs, FVGs, OTE, Kalman, AMD) |
+| `trade_htf_bias` | Higher timeframe bias check (4H/Daily structure) |
+| `trade_key_levels` | All institutional levels: PDH/PDL, PWH/PWL, session ranges, EQH/EQL, POC |
+| `trade_dol` | Draw on Liquidity — where price is heading next |
+| `trade_scanner` | Multi-pair scanner with scoring (A+ to D grade) |
 | `trade_risk_calc` | Position sizing calculator |
-| `trade_partial_tp` | Partial TP levels (30/40/30) |
+| `trade_partial_tp` | Partial TP levels (30/40/30 split) |
 | `trade_daily_limit` | Daily risk limit checker |
+| `trade_journal_log` | Log trade entry for journaling |
+| `trade_journal_close` | Close trade with result |
+| `trade_journal_stats` | Win rate, streak, P&L stats |
 
 ## The 7-Gate System
 

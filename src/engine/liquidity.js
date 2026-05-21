@@ -40,39 +40,58 @@ export function detectRecentSweep(bars, swingHighs, swingLows, lookback = 10) {
   return { swept: false, type: null, price: null, barsAgo: null };
 }
 
-export function detectOrderBlocks(bars) {
+export function detectOrderBlocks(bars, requireDisplacement = true) {
   const bullOBs = [];
   const bearOBs = [];
+
+  // Average body for displacement threshold
+  const bodies = bars.slice(-20).map((b) => Math.abs(b.close - b.open));
+  const avgBody = bodies.reduce((s, b) => s + b, 0) / bodies.length;
+  const displThreshold = avgBody * 1.5;
 
   for (let i = bars.length - 1; i >= 1; i--) {
     const curr = bars[i];
     const prev = bars[i - 1];
+    const currBody = Math.abs(curr.close - curr.open);
 
     // Bull OB: last bearish candle before a bullish displacement
     if (curr.close > curr.open && prev.close < prev.open) {
-      bullOBs.push({
-        top: Math.max(prev.open, prev.close),
-        bottom: prev.low,
-        time: prev.time,
-        timeEnd: curr.time,
-      });
-      if (bullOBs.length >= 2) break;
+      const isDisplacement = !requireDisplacement || currBody > displThreshold;
+      if (isDisplacement) {
+        bullOBs.push({
+          top: Math.max(prev.open, prev.close),
+          bottom: prev.low,
+          time: prev.time,
+          timeEnd: curr.time,
+          side: "bull",
+          displacement: currBody > displThreshold,
+          strength: (currBody / avgBody).toFixed(1),
+        });
+        if (bullOBs.length >= 3) break;
+      }
     }
   }
 
   for (let i = bars.length - 1; i >= 1; i--) {
     const curr = bars[i];
     const prev = bars[i - 1];
+    const currBody = Math.abs(curr.close - curr.open);
 
     // Bear OB: last bullish candle before a bearish displacement
     if (curr.close < curr.open && prev.close > prev.open) {
-      bearOBs.push({
-        top: prev.high,
-        bottom: Math.min(prev.open, prev.close),
-        time: prev.time,
-        timeEnd: curr.time,
-      });
-      if (bearOBs.length >= 2) break;
+      const isDisplacement = !requireDisplacement || currBody > displThreshold;
+      if (isDisplacement) {
+        bearOBs.push({
+          top: prev.high,
+          bottom: Math.min(prev.open, prev.close),
+          time: prev.time,
+          timeEnd: curr.time,
+          side: "bear",
+          displacement: currBody > displThreshold,
+          strength: (currBody / avgBody).toFixed(1),
+        });
+        if (bearOBs.length >= 3) break;
+      }
     }
   }
 

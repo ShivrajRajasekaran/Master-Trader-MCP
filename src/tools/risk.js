@@ -15,8 +15,8 @@ export function registerRiskTools(server) {
     async ({ balance, risk_percent = 1, sl_pips, pip_value, instrument = "xauusd" }) => {
       const riskDollar = balance * (risk_percent / 100);
 
-      // Auto pip value: XAUUSD = $0.01/pip for 0.01 lot, Forex = $0.10/pip for 0.01 lot
-      const autoValue = instrument === "xauusd" ? 0.01 : 0.10;
+      // Auto pip value: XAUUSD = $0.10/pip for 0.01 lot (1 pip = 0.1 price), Forex = $0.10/pip for 0.01 lot (1 pip = 0.0001)
+      const autoValue = instrument === "xauusd" ? 0.10 : 0.10;
       const pipVal = pip_value || autoValue;
 
       // Lot size = risk$ / (SL pips × pip value per 0.01 lot) × 0.01

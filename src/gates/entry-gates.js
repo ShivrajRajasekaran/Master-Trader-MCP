@@ -22,6 +22,9 @@ import {
   computeOTE,
   priceInOTE,
 } from "../engine/liquidity.js";
+import { detectAMDPhase } from "../engine/amd.js";
+import { analyzeVolume, validateDisplacementWithVolume } from "../engine/volume.js";
+import { getOptimalEntryTiming } from "../engine/time.js";
 
 const MAX_TRADES_PER_DAY = 3;
 const SIGNAL_COOLDOWN_BARS = 20;
@@ -206,6 +209,24 @@ export function runGates(data) {
     }
 
     results.confidence = `${results.passed}/${results.total} gates passed`;
+
+    // CONFLUENCE BOOSTERS (don't gate, but add confidence)
+    const vol = analyzeVolume(bars);
+    const amd = detectAMDPhase(bars, session);
+    const timing = getOptimalEntryTiming(currentTime);
+
+    results.confluence = {
+      volume: vol ? { state: vol.state, rising: vol.rising } : null,
+      amd: { phase: amd.phase, confidence: amd.confidence },
+      timing: { score: timing.score, quarter: timing.quarterly.quarter },
+    };
+
+    // Confidence grade
+    let grade = results.passed;
+    if (vol && (vol.state === "HIGH" || vol.state === "CLIMAX") && vol.rising) grade += 0.5;
+    if (amd.phase === "Distribution") grade += 0.5;
+    if (timing.score >= 2) grade += 0.5;
+    results.grade = grade >= 8.5 ? "A+" : grade >= 7.5 ? "A" : grade >= 6.5 ? "B+" : "B";
   } else {
     results.signal = "WAIT";
     results.reason = `Only ${results.passed}/${results.total} gates passed (need ${minGates} for ${sensitivity})`;

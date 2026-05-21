@@ -7,14 +7,16 @@
 const KILL_ZONES = {
   london: { start: 2, end: 5, label: "London KZ", type: "manipulation" },
   ny_am: { start: 9.5, end: 11, label: "NY AM KZ", type: "distribution" },
-  silver_bullet: { start: 10, end: 11, label: "Silver Bullet", type: "backup" },
+  silver_bullet: { start: 10, end: 11, label: "Silver Bullet", type: "sniper" },
+  ny_pm_kz: { start: 13.5, end: 15, label: "NY PM KZ", type: "continuation" },
 };
 
 const AVOID_ZONES = {
-  asian: { start: 20, end: 2, label: "Asian", reason: "Mark range only" },
-  dead: { start: 0, end: 3, label: "Dead Zone", reason: "No liquidity" },
-  ny_lunch: { start: 12, end: 13, label: "NY Lunch", reason: "Low volume chop" },
-  ny_pm: { start: 13, end: 16, label: "NY PM", reason: "Low volume" },
+  asian: { start: 20, end: 0, label: "Asian Session", reason: "Mark range only — no entries" },
+  pre_london: { start: 0, end: 2, label: "Pre-London", reason: "No liquidity — only accumulation" },
+  london_ny_gap: { start: 5, end: 9.5, label: "London-NY Gap", reason: "Transition — wait for NY" },
+  ny_lunch: { start: 11, end: 13.5, label: "NY Lunch", reason: "Low volume chop — avoid" },
+  ny_close: { start: 15, end: 20, label: "NY Close", reason: "Reversion — not trending" },
 };
 
 const SESSION_PIVOTS = {

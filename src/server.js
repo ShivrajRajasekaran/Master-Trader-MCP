@@ -13,6 +13,9 @@ import { registerAnalysisTools } from "./tools/analysis.js";
 import { registerSignalTools } from "./tools/signal.js";
 import { registerRiskTools } from "./tools/risk.js";
 import { registerSessionTools } from "./tools/session.js";
+import { registerScannerTools } from "./tools/scanner.js";
+import { registerJournalTools } from "./tools/journal.js";
+import { registerLevelsTools } from "./tools/levels.js";
 
 const server = new McpServer(
   {
@@ -52,6 +55,9 @@ registerAnalysisTools(server);
 registerSignalTools(server);
 registerRiskTools(server);
 registerSessionTools(server);
+registerScannerTools(server);
+registerJournalTools(server);
+registerLevelsTools(server);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
