@@ -15,14 +15,19 @@
 ### Windows (PowerShell)
 
 ```powershell
-git clone https://github.com/ShivrajRajasekaran/Master-ForexTrader-MCP.git && cd Master-ForexTrader-MCP && npm install && claude mcp add master-forextrader -- node "%cd%\src\server.js"
+git clone https://github.com/ShivrajRajasekaran/Master-ForexTrader-MCP.git && cd Master-ForexTrader-MCP && powershell -ExecutionPolicy Bypass -File install.ps1
 ```
 
 ### Mac / Linux
 
 ```bash
-git clone https://github.com/ShivrajRajasekaran/Master-ForexTrader-MCP.git && cd Master-ForexTrader-MCP && npm install && claude mcp add master-forextrader -- node "$(pwd)/src/server.js"
+git clone https://github.com/ShivrajRajasekaran/Master-ForexTrader-MCP.git && cd Master-ForexTrader-MCP && bash install.sh
 ```
+
+This installs everything:
+- MCP server (22 engines, 24 tools)
+- Slash commands (`/forex`, `/forex-signal`, etc.)
+- CLAUDE.md registration
 
 ### Verify Installation
 
@@ -32,11 +37,37 @@ npm test
 
 > 24 tests, all passing. You're ready to trade.
 
+### Telegram Alerts (Optional)
+
+Create a `.env` file in the project root:
+```
+TELEGRAM_BOT_TOKEN=your_bot_token_from_botfather
+TELEGRAM_CHAT_ID=your_chat_id
+```
+
 ### Python Data Science (Optional)
 
 ```bash
 cd python && pip install -r requirements.txt
 ```
+
+---
+
+## Slash Commands
+
+Type these in Claude Code for instant access:
+
+| Command | What It Does |
+|---------|-------------|
+| `/forex` | Quick status — Kill Zone? Open trades? Ready? |
+| `/forex-signal` | 7-gate system → BUY / SELL / WAIT with grade |
+| `/forex-checklist` | Full 10-point institutional checklist |
+| `/forex-orderflow` | Delta, absorption, imbalance — who's in control |
+| `/forex-vwap` | Anchored VWAP + bands + premium/discount |
+| `/forex-risk` | Position sizing & risk management |
+| `/forex-scan` | Scan watchlist, rank A+ to D |
+| `/forex-journal` | Win rate, P&L, streak, edge analysis |
+| `/forex-session` | Kill Zone status + countdown to next window |
 
 ---
 
