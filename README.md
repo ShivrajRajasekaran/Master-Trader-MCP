@@ -59,16 +59,18 @@ npm test   # 24 tests, all passing
 
 ---
 
-## Tools (13 total)
+## Tools (17 total)
 
 ### Signal & Analysis
 
 | Tool | Purpose |
 |------|---------|
-| `trade_signal` | Full 7-gate system → BUY / SELL / WAIT |
+| `trade_signal` | Full 7-gate system → BUY / SELL / WAIT with grade (A+ to B) |
 | `trade_analyze` | Complete market breakdown (structure, OBs, FVGs, OTE, Kalman, AMD) |
 | `trade_htf_bias` | Higher timeframe direction (4H / Daily) |
 | `trade_scanner` | Score multiple pairs → ranked A+ to D |
+| `trade_confirmation` | Entry confirmation: candle patterns, zone status, divergence, Judas Swing, news |
+| `trade_mtf_check` | Multi-timeframe alignment (HTF + ITF + LTF) |
 
 ### Session & Timing
 
@@ -83,6 +85,7 @@ npm test   # 24 tests, all passing
 |------|---------|
 | `trade_key_levels` | PDH/PDL, PWH/PWL, Asia/London/NY ranges, EQH/EQL, POC |
 | `trade_dol` | Draw on Liquidity — most probable TP target |
+| `trade_fib_extensions` | Fibonacci extension TP targets (-27%, -62%, -100%) |
 
 ### Risk & Management
 
@@ -91,6 +94,7 @@ npm test   # 24 tests, all passing
 | `trade_risk_calc` | Position size from balance + risk% + SL distance |
 | `trade_partial_tp` | Partial TP levels (30% / 40% / 30% at 1.5R / 2.5R / 4R) |
 | `trade_daily_limit` | Daily loss & trade count check |
+| `trade_money_management` | Kelly Criterion, compounding, drawdown recovery plan |
 
 ### Journal
 
@@ -123,7 +127,7 @@ Every signal must pass through these gates sequentially:
 
 ---
 
-## Engines
+## Engines (17 total)
 
 | Engine | Concepts |
 |--------|----------|
@@ -131,11 +135,19 @@ Every signal must pass through these gates sequentially:
 | `kill-zones.js` | ICT Kill Zones, session pivots, avoid zones |
 | `structure.js` | Swing detection, BOS, CHoCH, CISD, CRT, HTF bias |
 | `liquidity.js` | Order Blocks (displacement-validated), FVGs, OTE, sweeps |
-| `amd.js` | AMD state machine — detects accumulation/manipulation/distribution |
-| `volume.js` | Volume profile, POC/VAH/VAL, exhaustion, displacement validation |
+| `amd.js` | AMD state machine — Accumulation/Manipulation/Distribution |
+| `volume.js` | Volume profile, POC/VAH/VAL, exhaustion, displacement confirmation |
 | `patterns.js` | Wyckoff Spring/UTAD, Breaker Blocks, Inducement |
 | `levels.js` | PDH/PDL, PWH/PWL, session ranges, EQH/EQL |
 | `time.js` | Quarterly Theory, Macro Windows (xx:50-xx:10), Silver Bullet |
+| `candles.js` | Engulfing, Pin Bar, Hammer, Doji, Morning/Evening Star |
+| `mitigation.js` | Zone lifecycle: FRESH → TESTED → MITIGATED → BROKEN |
+| `blocks.js` | Rejection Blocks, Propulsion Blocks, Fib Extensions, Liquidity Voids |
+| `mtf.js` | Multi-timeframe alignment (HTF direction + ITF structure + LTF entry) |
+| `divergence.js` | Price/volume divergence, momentum divergence, hidden divergence |
+| `sessions.js` | Session liquidity tracking, Asian Breakout, Judas Swing |
+| `news.js` | High-impact event filter (NFP, FOMC, CPI, ECB, BOE) |
+| `money.js` | Kelly Criterion, compounding, drawdown recovery, streak rules |
 
 ---
 
@@ -166,34 +178,74 @@ Every signal must pass through these gates sequentially:
 
 ---
 
+## Python Data Science Layer
+
+For backtesting, Monte Carlo simulation, and statistical validation:
+
+```bash
+cd python
+pip install -r requirements.txt
+
+# Backtest the 7-gate system
+python backtest.py --data ../data/XAUUSD_5M.csv --risk 1 --mode balanced --rr 2
+
+# Monte Carlo (account survival probability)
+python statistics.py --monte-carlo --balance 25 --risk 1 --winrate 55 --rr 2
+
+# Generate equity curve charts
+python equity_curve.py --data backtest_results.json --output charts/
+```
+
+| Script | What It Does |
+|--------|-------------|
+| `backtest.py` | Full 7-gate simulation on historical data → win rate, profit factor, Sharpe |
+| `statistics.py` | Monte Carlo, edge validation (t-test), distribution analysis, correlation |
+| `equity_curve.py` | Professional equity curve, drawdown, monthly returns, P&L distribution |
+
+---
+
 ## Architecture
 
 ```
 src/
 ├── server.js              MCP server entry (stdio transport)
-├── index.js               Library exports
-├── engine/                Pure analysis engines (no I/O)
-│   ├── kalman-filter.js
-│   ├── kill-zones.js
-│   ├── structure.js
-│   ├── liquidity.js
-│   ├── amd.js
-│   ├── volume.js
-│   ├── patterns.js
-│   ├── levels.js
-│   └── time.js
+├── index.js               Library exports (all engines)
+├── engine/                Pure analysis engines (17 files, no I/O)
+│   ├── kalman-filter.js   Trend detection
+│   ├── kill-zones.js      Session timing
+│   ├── structure.js       BOS, CHoCH, CISD, CRT
+│   ├── liquidity.js       OBs, FVGs, OTE, sweeps
+│   ├── amd.js             AMD state machine
+│   ├── volume.js          Volume profile, POC
+│   ├── patterns.js        Wyckoff, Breakers, Inducement
+│   ├── levels.js          PDH/PDL, PWH/PWL, EQH/EQL
+│   ├── time.js            Quarterly, Macro, Silver Bullet
+│   ├── candles.js         Engulfing, Pin Bar, Hammer, Doji
+│   ├── mitigation.js      Zone lifecycle tracking
+│   ├── blocks.js          Rejection, Propulsion, Voids
+│   ├── mtf.js             Multi-timeframe alignment
+│   ├── divergence.js      Price/volume divergence
+│   ├── sessions.js        Session liquidity, Judas Swing
+│   ├── news.js            Event filter
+│   └── money.js           Kelly, compounding, recovery
 ├── gates/
 │   └── entry-gates.js     7-gate orchestrator
-└── tools/                 MCP tool registrations
+└── tools/                 MCP tool registrations (8 files, 17 tools)
     ├── analysis.js
     ├── signal.js
     ├── risk.js
     ├── session.js
     ├── scanner.js
     ├── journal.js
-    └── levels.js
+    ├── levels.js
+    └── confirmation.js
 tests/
 └── engines.test.js        24 tests
+python/
+├── backtest.py            7-gate backtester
+├── statistics.py          Monte Carlo, edge validation
+├── equity_curve.py        Chart generation
+└── requirements.txt
 ```
 
 ---
