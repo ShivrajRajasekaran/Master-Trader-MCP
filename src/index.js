@@ -33,6 +33,9 @@ export { getDXYBias, checkCorrelation, getMacroBias, CORRELATION_MAP } from "./e
 export { computeVWAP, anchorToSessionOpen, anchorToSwingHigh, anchorToSwingLow, anchorToLiquiditySweep, getVWAPAnalysis, vwapConfluence } from "./engine/vwap.js";
 export { estimateDelta, cumulativeDelta, detectDeltaDivergence, detectImbalance, detectAbsorption, detectExhaustionVolume, getOrderFlowAnalysis } from "./engine/orderflow.js";
 
+// C4 Strategy (S/R Reversal System)
+export { identifyC4Setup, checkC1_ZoneProximity, checkC2_PriceRejection, checkC3_MomentumShift, checkC4_EntryTrigger, detectSRZones } from "./engine/c4-strategy.js";
+
 // Alerts & Journal
 export { formatAlertMessage, shouldAlert, sendTelegramAlert, sendWebhookAlert } from "./engine/alerts.js";
 export { logTrade, closeTrade, getJournalStats, getTodayTrades, getOpenTrades } from "./engine/persistent-journal.js";

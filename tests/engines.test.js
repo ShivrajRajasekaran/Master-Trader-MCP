@@ -11,6 +11,7 @@ import { detectDisplacement, detectWyckoffSpring } from "../src/engine/patterns.
 import { computePDH_PDL, detectEqualHighs } from "../src/engine/levels.js";
 import { getQuarterlyPhase, getMacroWindow } from "../src/engine/time.js";
 import { runGates } from "../src/gates/entry-gates.js";
+import { identifyC4Setup, checkC1_ZoneProximity, checkC2_PriceRejection, detectSRZones } from "../src/engine/c4-strategy.js";
 
 function makeBars(count, startPrice = 2000, trend = "up") {
   const bars = [];
@@ -241,5 +242,44 @@ describe("7-Gate System", () => {
 
     const gate1 = result.gates[0];
     assert.strictEqual(gate1.passed, false);
+  });
+});
+
+describe("C4 Strategy", () => {
+  test("detectSRZones finds zones from price data", () => {
+    const bars = makeBars(60);
+    const zones = detectSRZones(bars, 50, 1);
+    assert.ok(Array.isArray(zones));
+    if (zones.length > 0) {
+      assert.ok(zones[0].type === "support" || zones[0].type === "resistance");
+      assert.ok(zones[0].high > zones[0].low);
+    }
+  });
+
+  test("checkC1_ZoneProximity detects proximity", () => {
+    const candle = { open: 2000, high: 2005, low: 1995, close: 2002 };
+    const zones = [{ type: "support", high: 2004, low: 1998, touches: 3 }];
+    const result = checkC1_ZoneProximity(candle, zones, 0.5);
+    assert.strictEqual(result.confirmed, true);
+    assert.strictEqual(result.zone.type, "support");
+  });
+
+  test("checkC2_PriceRejection detects pin bar", () => {
+    const candles = [
+      { open: 2000, high: 2005, low: 1985, close: 2003 }, // big lower wick = bullish pin
+    ];
+    const zone = { type: "support", high: 2005, low: 1990 };
+    const result = checkC2_PriceRejection(candles, zone);
+    assert.strictEqual(result.confirmed, true);
+  });
+
+  test("identifyC4Setup returns structured result", () => {
+    const bars = makeBars(50);
+    const zones = [{ type: "support", high: bars[49].close + 1, low: bars[49].close - 5, touches: 3, htf: true }];
+    const result = identifyC4Setup(bars, zones, {});
+    assert.ok(typeof result.setup === "boolean");
+    if (!result.setup) {
+      assert.ok(result.stage || result.reason);
+    }
   });
 });

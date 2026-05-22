@@ -21,6 +21,7 @@ import { registerChecklistTools } from "./tools/checklist.js";
 import { registerAlertTools } from "./tools/alerts.js";
 import { registerAutoScanTools } from "./tools/autoscan.js";
 import { registerOrderFlowTools } from "./tools/orderflow.js";
+import { registerC4Tools } from "./tools/c4.js";
 
 const server = new McpServer(
   {
@@ -68,6 +69,7 @@ registerChecklistTools(server);
 registerAlertTools(server);
 registerAutoScanTools(server);
 registerOrderFlowTools(server);
+registerC4Tools(server);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
