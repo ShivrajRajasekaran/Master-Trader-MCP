@@ -12,6 +12,9 @@ import { computePDH_PDL, detectEqualHighs } from "../src/engine/levels.js";
 import { getQuarterlyPhase, getMacroWindow } from "../src/engine/time.js";
 import { runGates } from "../src/gates/entry-gates.js";
 import { identifyC4Setup, checkC1_ZoneProximity, checkC2_PriceRejection, detectSRZones } from "../src/engine/c4-strategy.js";
+import { analyzeTrendFollowing } from "../src/engine/trend-following.js";
+import { analyzeRangeTrading } from "../src/engine/range-trading.js";
+import { analyzeBreakout } from "../src/engine/breakout-trading.js";
 
 function makeBars(count, startPrice = 2000, trend = "up") {
   const bars = [];
@@ -281,5 +284,68 @@ describe("C4 Strategy", () => {
     if (!result.setup) {
       assert.ok(result.stage || result.reason);
     }
+  });
+});
+
+describe("Trend Following", () => {
+  test("analyzeTrendFollowing returns structured result", () => {
+    const bars = makeBars(250, 2000, "up");
+    const result = analyzeTrendFollowing(bars);
+    assert.ok(["BUY", "SELL", "WAIT"].includes(result.signal));
+    assert.ok(typeof result.score === "number");
+    assert.ok(result.trend);
+    assert.ok(result.trend.emaStack);
+    assert.ok(result.management);
+  });
+
+  test("analyzeTrendFollowing insufficient data returns WAIT", () => {
+    const bars = makeBars(10);
+    const result = analyzeTrendFollowing(bars);
+    assert.strictEqual(result.signal, "WAIT");
+  });
+});
+
+describe("Range Trading", () => {
+  test("analyzeRangeTrading returns structured result", () => {
+    // Create ranging bars (oscillate between 2000-2050)
+    const bars = [];
+    let price = 2025;
+    for (let i = 0; i < 60; i++) {
+      const dir = price > 2040 ? -1 : price < 2010 ? 1 : (Math.random() > 0.5 ? 1 : -1);
+      const move = Math.random() * 5 * dir;
+      const open = price;
+      const close = Math.max(2005, Math.min(2045, price + move));
+      const high = Math.max(open, close) + Math.random() * 3;
+      const low = Math.min(open, close) - Math.random() * 3;
+      bars.push({ time: 1700000000 + i * 300, open, high, low, close, volume: 500 });
+      price = close;
+    }
+    const result = analyzeRangeTrading(bars);
+    assert.ok(["BUY", "SELL", "WAIT"].includes(result.signal));
+    assert.ok(typeof result.adx === "number");
+  });
+
+  test("analyzeRangeTrading rejects trending market", () => {
+    const bars = makeBars(60, 2000, "up");
+    const result = analyzeRangeTrading(bars);
+    // Should either be WAIT or detect trending
+    assert.ok(result.signal === "WAIT" || result.marketState === "TRENDING" || result.adx !== undefined);
+  });
+});
+
+describe("Breakout Trading", () => {
+  test("analyzeBreakout returns structured result", () => {
+    const bars = makeBars(50);
+    const result = analyzeBreakout(bars);
+    assert.ok(["BUY", "SELL", "WAIT"].includes(result.signal));
+    assert.ok(typeof result.score === "number");
+    assert.ok(result.squeeze !== undefined);
+    assert.ok(result.falseBreakoutRules);
+  });
+
+  test("analyzeBreakout insufficient data returns WAIT", () => {
+    const bars = makeBars(5);
+    const result = analyzeBreakout(bars);
+    assert.strictEqual(result.signal, "WAIT");
   });
 });

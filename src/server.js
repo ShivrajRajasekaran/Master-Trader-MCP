@@ -22,6 +22,7 @@ import { registerAlertTools } from "./tools/alerts.js";
 import { registerAutoScanTools } from "./tools/autoscan.js";
 import { registerOrderFlowTools } from "./tools/orderflow.js";
 import { registerC4Tools } from "./tools/c4.js";
+import { registerCoreStrategyTools } from "./tools/core-strategies.js";
 
 const server = new McpServer(
   {
@@ -70,6 +71,7 @@ registerAlertTools(server);
 registerAutoScanTools(server);
 registerOrderFlowTools(server);
 registerC4Tools(server);
+registerCoreStrategyTools(server);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
